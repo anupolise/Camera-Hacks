@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -43,9 +44,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int MY_CAMERA_REQUEST_CODE = 100;
-    public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+
     Task<List<FirebaseVisionLabel>> result = null;
     public final String APP_TAG = "CameraHacx";
     private static final int REQ_CODE_SPEECH_INPUT = 200;
@@ -76,9 +75,10 @@ public class MainActivity extends AppCompatActivity {
                     MY_CAMERA_REQUEST_CODE);
         }
 
-        //camera intent
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+//        //camera intent
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        openCamera();
 
         //V2S
         Intent intentV2S = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -93,60 +93,80 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public boolean openCamera()
+    {
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            return true;
+        }
+        return false;
+    }
+
+    public static Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        }
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
+        }
+        return c; // returns null if camera is unavailable
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ImageView imgView = new ImageView(this);
-        Bitmap bitmapPhoto = null;
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            resultCode = RESULT_OK;
-            if (resultCode == RESULT_OK) {
-                bitmapPhoto = (Bitmap) data.getExtras().get("data");
-                imgView.setImageBitmap(bitmapPhoto);
-                imgView.setVisibility(View.VISIBLE);
-
-                // store img
-                MediaStore.Images.Media.insertImage(getContentResolver(), bitmapPhoto, "IMG"+new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) , "");
-
-
-                createDirectoryAndSaveFile(generateFileName(), imgView);
-
-                FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapPhoto);
-                FirebaseVisionLabelDetector detector = FirebaseVision.getInstance()
-                        .getVisionLabelDetector();
-
-                result =
-                        detector.detectInImage(image)
-                                .addOnSuccessListener(
-                                        new OnSuccessListener<List<FirebaseVisionLabel>>() {
-                                            @Override
-                                            public void onSuccess(List<FirebaseVisionLabel> labels) {
-                                                // Task completed successfully
-                                                // ...
-                                                printResults();
-
-                                            }
-                                        })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Task failed with an exception
-                                                // ...
-                                            }
-                                        });
-
-                Toast.makeText(this, "Picture saved!", Toast.LENGTH_LONG).show();
-
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-
-                Log.d("ANU", "we took pic");
-
-
-            } else {
-                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
-            }
-        }
+//        ImageView imgView = new ImageView(this);
+//        Bitmap bitmapPhoto = null;
+//        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+//            resultCode = RESULT_OK;
+//            if (resultCode == RESULT_OK) {
+//                bitmapPhoto = (Bitmap) data.getExtras().get("data");
+//                imgView.setImageBitmap(bitmapPhoto);
+//                imgView.setVisibility(View.VISIBLE);
+//
+//                // store img
+//                MediaStore.Images.Media.insertImage(getContentResolver(), bitmapPhoto, "IMG"+new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) , "");
+//
+//
+//                createDirectoryAndSaveFile(generateFileName(), imgView);
+//
+//                FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapPhoto);
+//                FirebaseVisionLabelDetector detector = FirebaseVision.getInstance()
+//                        .getVisionLabelDetector();
+//
+//                result =
+//                        detector.detectInImage(image)
+//                                .addOnSuccessListener(
+//                                        new OnSuccessListener<List<FirebaseVisionLabel>>() {
+//                                            @Override
+//                                            public void onSuccess(List<FirebaseVisionLabel> labels) {
+//                                                // Task completed successfully
+//                                                // ...
+//                                                printResults();
+//
+//                                            }
+//                                        })
+//                                .addOnFailureListener(
+//                                        new OnFailureListener() {
+//                                            @Override
+//                                            public void onFailure(@NonNull Exception e) {
+//                                                // Task failed with an exception
+//                                                // ...
+//                                            }
+//                                        });
+//
+//                Toast.makeText(this, "Picture saved!", Toast.LENGTH_LONG).show();
+//
+//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+//
+//                Log.d("ANU", "we took pic");
+//
+//
+//            } else {
+//                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+//            }
+//        }
         if(requestCode == REQ_CODE_SPEECH_INPUT){
             ArrayList<String> list = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
