@@ -44,20 +44,9 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    Task<List<FirebaseVisionLabel>> result = null;
     public final String APP_TAG = "CameraHacx";
     private static final int REQ_CODE_SPEECH_INPUT = 200;
     private static final int MY_CAMERA_REQUEST_CODE = 100;
-
-
-    FirebaseVisionLabelDetectorOptions options =
-            new FirebaseVisionLabelDetectorOptions.Builder()
-                    .setConfidenceThreshold(0.8f)
-                    .build();
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,26 +64,20 @@ public class MainActivity extends AppCompatActivity {
                     MY_CAMERA_REQUEST_CODE);
         }
 
-//        //camera intent
+        listeningIntent();
 
+    }
 
-
-        //V2S
-        openCamera();
-
-
+    public void listeningIntent() {
         try {
             Intent intentV2S = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
             intentV2S.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something!");
             startActivityForResult(intentV2S, REQ_CODE_SPEECH_INPUT);
-            
         }catch(ActivityNotFoundException a) {
             Log.e("ERROR2","Could not find activity");
         }
-
-
 
     }
 
@@ -141,19 +124,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("IMPO", strSaid);
 
         };
+       openCamera();
 
     }
 
-    public void printResults(){
-        for (FirebaseVisionLabel label:result.getResult())
-        {
-            String text = label.getLabel();
-            String entityId = label.getEntityId();
-            float confidence = label.getConfidence();
-            Log.d("VALUES",text +" "+confidence);
-        }
 
-    }
 
     private String generateFileName()
     {

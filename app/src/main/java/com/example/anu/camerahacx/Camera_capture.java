@@ -3,16 +3,20 @@ package com.example.anu.camerahacx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Display;
@@ -47,6 +51,22 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                     .setConfidenceThreshold(0.8f)
                     .build();
 
+    private static final int REQ_CODE_SPEECH_INPUT = 200;
+
+
+    public void listeningIntent() {
+        try {
+            Intent intentV2S = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+            intentV2S.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something!");
+            startActivityForResult(intentV2S, REQ_CODE_SPEECH_INPUT);
+        }catch(ActivityNotFoundException a) {
+            Log.e("ERROR2","Could not find activity");
+        }
+
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +135,31 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                                                 // ...
                                             }
                                         });
-                camera.startPreview();
+               listeningIntent();
+
 
             }
         });
 
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        String strSaid = new String();
+        Log.d("IMPO", "HELLLOOOO2");
+        super.onActivityResult(requestCode, resultCode, intent);
+        if(requestCode == REQ_CODE_SPEECH_INPUT){
+            ArrayList<String> list = intent.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            if(list.size() == 0)
+            {
+                strSaid = "";
+                return;
+            }
+            strSaid = list.get(0);
+            Log.d("IMPO", strSaid);
+
+        };
+        openCamera();
     }
 
 
@@ -133,7 +173,21 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         }
 
     }
+    public boolean openCamera()
+    {
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
 
+            String CUSTOM_ACTION = "com.example.anu.camerahacx.Camera_capture";
+
+            Intent i = new Intent(this ,Camera_capture.class);
+            startActivityForResult(i,90);
+
+
+            return true;
+        }
+        return false;
+    }
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
@@ -171,7 +225,7 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.e("Surface Destroyed", "");
-        mCamera.release();
+       // mCamera.release();
     }
 
     @Override
@@ -179,7 +233,7 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         super.onPause();
         if (mCamera != null) {
             mCamera.stopPreview();
-            mCamera.release();
+           // mCamera.release();
         }
     }
 
