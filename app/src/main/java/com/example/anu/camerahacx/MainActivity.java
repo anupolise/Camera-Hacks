@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     Task<List<FirebaseVisionLabel>> result = null;
     public final String APP_TAG = "CameraHacx";
     private static final int REQ_CODE_SPEECH_INPUT = 200;
-
+    private static final int MY_CAMERA_REQUEST_CODE = 100;
 
 
     FirebaseVisionLabelDetectorOptions options =
@@ -97,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
     {
         if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
             // this device has a camera
+
+            String CUSTOM_ACTION = "com.example.anu.camerahacx.Camera_capture";
+
+//Intent i = new Intent(this, FeedBackActivity.class);  // <--- You might need to do it this way.
+            Intent i = new Intent(MainActivity.this,Camera_capture.class);
+            startActivityForResult(i,200);
+
             return true;
         }
         return false;
@@ -167,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
 //            }
 //        }
+        if(requestCode == 200) {
+            Log.d("SAID", "WE DID IT");
+        }
         if(requestCode == REQ_CODE_SPEECH_INPUT){
             ArrayList<String> list = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
