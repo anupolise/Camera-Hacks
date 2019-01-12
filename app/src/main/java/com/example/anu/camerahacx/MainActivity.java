@@ -1,6 +1,7 @@
 package com.example.anu.camerahacx;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,8 +36,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     Task<List<FirebaseVisionLabel>> result = null;
     public final String APP_TAG = "CameraHacx";
+    private static final int REQ_CODE_SPEECH_INPUT = 200;
+
 
 
     FirebaseVisionLabelDetectorOptions options =
@@ -70,8 +76,20 @@ public class MainActivity extends AppCompatActivity {
                     MY_CAMERA_REQUEST_CODE);
         }
 
+        //camera intent
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+
+        //V2S
+        Intent intentV2S = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intentV2S.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something!");
+        try {
+            startActivityForResult(intentV2S, REQ_CODE_SPEECH_INPUT);
+        }catch(ActivityNotFoundException a) {
+
+        }
 
     }
 
@@ -80,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         ImageView imgView = new ImageView(this);
         Bitmap bitmapPhoto = null;
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            resultCode = RESULT_OK;
             if (resultCode == RESULT_OK) {
                 bitmapPhoto = (Bitmap) data.getExtras().get("data");
                 imgView.setImageBitmap(bitmapPhoto);
@@ -124,14 +143,22 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("ANU", "we took pic");
 
 
-
-
-
-
             } else {
                 Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
         }
+        if(requestCode == REQ_CODE_SPEECH_INPUT){
+            ArrayList<String> list = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            if(list.size() == 0)
+            {
+                Toast.makeText(this, "You said nothing", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String strSaid = list.get(0);
+            Log.d("SAID", strSaid);
+        };
+
     }
 
     public void printResults(){
