@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "943908124465",
+    "firebase_url": "https://camerahacx.firebaseio.com",
+    "project_id": "camerahacx",
+    "storage_bucket": "camerahacx.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:943908124465:android:72cc7a0061ec473f",
+        "android_client_info": {
+          "package_name": "com.example.anu.camerahacx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "943908124465-rqmuhlndf0a7m95i45minpe7ci5c99si.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.anu.camerahacx",
+            "certificate_hash": "8939a4f02159f628509be4733860f57badfbd757"
+          }
+        },
+        {
+          "client_id": "943908124465-0e2lov9ahvkikaite9sui04a2npspch7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtdqIdahSGCc4WyMocvINwEtsn8HF1BGY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "943908124465-0e2lov9ahvkikaite9sui04a2npspch7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
