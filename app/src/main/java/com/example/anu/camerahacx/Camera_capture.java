@@ -17,6 +17,7 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Display;
@@ -45,6 +46,10 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
     private SurfaceHolder surfaceHolder;
     private Button capture_image;
 
+    TextToSpeech tts;
+    boolean ttsReady =  false;
+
+
     Task<List<FirebaseVisionLabel>> result = null;
     FirebaseVisionLabelDetectorOptions options =
             new FirebaseVisionLabelDetectorOptions.Builder()
@@ -64,9 +69,15 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         }catch(ActivityNotFoundException a) {
             Log.e("ERROR2","Could not find activity");
         }
+    }
+
+    public void talkingIntent(String text){
+        if(ttsReady){
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null); }
 
 
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +107,13 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                ttsReady = true;
+            }
+        });
     }
 
 
@@ -156,6 +174,7 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                 return;
             }
             strSaid = list.get(0);
+            talkingIntent(strSaid);
             Log.d("IMPO", strSaid);
 
         };
