@@ -164,7 +164,7 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         Camera.Parameters p = mCamera.getParameters();
         p.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                                         
+
 
     }
 
