@@ -65,22 +65,10 @@ public class MainActivity extends AppCompatActivity {
                     MY_CAMERA_REQUEST_CODE);
         }
 
-        listeningIntent();
+        openCamera();
 
     }
 
-    public void listeningIntent() {
-        try {
-            Intent intentV2S = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intentV2S.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-            intentV2S.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something!");
-            startActivityForResult(intentV2S, REQ_CODE_SPEECH_INPUT);
-        }catch(ActivityNotFoundException a) {
-            Log.e("ERROR2","Could not find activity");
-        }
-
-    }
 
     public boolean openCamera()
     {

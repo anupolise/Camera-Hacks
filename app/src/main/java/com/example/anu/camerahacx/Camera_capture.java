@@ -2,8 +2,10 @@ package com.example.anu.camerahacx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeMap;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -45,6 +47,11 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     private Button capture_image;
+    private boolean shouldCapture = false;
+
+    String strSaid = new String();
+
+    TreeMap<String,Double> firebaseConfVariables = new TreeMap<>();
 
     TextToSpeech tts;
     boolean ttsReady =  false;
@@ -74,9 +81,59 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
     public void talkingIntent(String text){
         if(ttsReady){
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null); }
+        shouldCapture = true;
 
 
     }
+
+    public String talkingLogic(String spokenWord){
+        capture();
+        String returnStr = new String();
+        if(spokenWord.contains("take"))
+        {
+            //TODO: find a way to save picture
+            returnStr = "Picture taken!";
+        }
+        else if(spokenWord.contains("what"))
+        {
+            returnStr = "I see ";
+            boolean first = true;
+            for (String key : firebaseConfVariables.keySet()) {
+                if(first && firebaseConfVariables.get(key)<.60)
+                {
+                    returnStr="Sorry, I don't know";
+                    break;
+                }
+                else
+                {
+                    first = false;
+                    if(firebaseConfVariables.get(key)>=.60)
+                        returnStr+=key+", ";
+                }
+
+            }
+        }
+        else if(spokenWord.contains("in"))
+        {
+            for (String key : firebaseConfVariables.keySet()) {
+                if(spokenWord.contains(key))
+                {
+                    returnStr="Yes";
+                    break;
+                }
+
+            }
+
+            returnStr="No";
+
+        }
+
+        if(returnStr.equals("")) {
+            returnStr = "Sorry, I didn't catch that";
+        }
+        return returnStr;
+    }
+
 
 
     @Override
@@ -114,11 +171,13 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                 ttsReady = true;
             }
         });
+        listeningIntent();
     }
 
 
 
     private void capture() {
+        Log.d("IMPO", "capture Called");
         mCamera.takePicture(null, null, null, new Camera.PictureCallback() {
 
             @Override
@@ -153,7 +212,15 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                                                 // ...
                                             }
                                         });
-               listeningIntent();
+                String result1 = talkingLogic(strSaid);
+                //String result1 = "happy brithday";
+                talkingIntent(result1);
+                if(shouldCapture)
+                {
+                    shouldCapture = false;
+                    listeningIntent();
+                }
+
 
 
             }
@@ -162,10 +229,15 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        String strSaid = new String();
+        String result = new String();
         Log.d("IMPO", "HELLLOOOO2");
         super.onActivityResult(requestCode, resultCode, intent);
         if(requestCode == REQ_CODE_SPEECH_INPUT){
+            if(intent==null)
+            {
+                Log.e("ERROR", "intent is null");
+                return;
+            }
             ArrayList<String> list = intent.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             if(list.size() == 0)
@@ -174,11 +246,16 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
                 return;
             }
             strSaid = list.get(0);
-            talkingIntent(strSaid);
             Log.d("IMPO", strSaid);
 
         };
         openCamera();
+       String resutle =  talkingLogic(strSaid);
+       talkingIntent(resutle);
+
+
+
+
     }
 
 
@@ -187,7 +264,8 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
         {
             String text = label.getLabel();
             String entityId = label.getEntityId();
-            float confidence = label.getConfidence();
+            double confidence = label.getConfidence();
+            firebaseConfVariables.put(text,confidence);
             Log.d("VALUES",text +" "+confidence);
         }
 
@@ -201,7 +279,6 @@ public class Camera_capture extends Activity implements SurfaceHolder.Callback {
 
             Intent i = new Intent(this ,Camera_capture.class);
             startActivityForResult(i,90);
-
 
             return true;
         }
